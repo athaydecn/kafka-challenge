@@ -25,7 +25,7 @@ $ sudo vi /etc/ansible/ansible.cfg
 ``` 
 
 
-Provisioning AWS Infraestructure
+Provisioning AWS Infrastructure
 ------------
 
 ```bash
