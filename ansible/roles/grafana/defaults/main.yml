@@ -1,0 +1,5 @@
+---
+
+grafana_release_url: https://dl.grafana.com/oss/release/grafana-6.5.0-1.x86_64.rpm
+grafana_group: grafana
+grafana_user: grafana

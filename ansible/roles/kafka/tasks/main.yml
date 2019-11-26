@@ -1,0 +1,77 @@
+---
+
+- name: install java
+  yum:
+    name: java-1.8.0-openjdk
+    state: latest
+  become: true
+
+- name: create kafka user
+  user:
+    name: "{{ user_kafka }}"
+    shell: /sbin/nologin
+    comment: "Kafka User"
+  become: true
+
+- name: create kafka log directory
+  file:
+    path: "{{ log_dir_kafka }}"
+    owner: "{{ user_kafka }}"
+    mode: 0755
+    state: directory
+  become: true
+
+- name: download kafka
+  unarchive:
+    src: "{{ kafka_link }}"
+    dest: "/opt/"
+    owner: "{{ user_kafka }}"
+    creates: "/opt/kafka_{{ version_kafka_release }}-{{ version_kafka }}"
+    remote_src: true
+  become: true
+
+- name: create symbolic link
+  file:
+    src: "/opt/kafka_{{ version_kafka_release }}-{{ version_kafka }}"
+    dest: "{{ path_kafka }}"
+    state: link
+  become: true
+
+- name: change config files
+  template:
+    src: "{{ item.orig }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ user_kafka }}"
+    backup: true
+  with_items:
+    - orig: server.properties.j2
+      dest: "{{ path_kafka }}/config/server.properties"
+    - orig: zookeeper.properties.j2
+      dest: "{{ path_kafka }}/config/zookeeper.properties"
+    - orig: jvm.properties.j2
+      dest: "{{ path_kafka }}/config/jvm.properties"
+  become: true
+
+- name: download lib of prometheus
+  get_url:
+    url: https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.6/jmx_prometheus_javaagent-0.6.jar
+    dest: /etc/kafka/libs/jmx_prometheus_javaagent-0.6.jar
+    owner: "{{ user_kafka }}"
+    mode: 0644
+  become: true
+
+- name: download metric files
+  get_url:
+    url: https://raw.githubusercontent.com/prometheus/jmx_exporter/master/example_configs/kafka-0-8-2.yml
+    dest: /etc/kafka/kafka-0-8-2.yml
+    owner: "{{ user_kafka }}"
+    mode: 0644
+  become: true
+
+- name: config kafka service
+  template:
+    src: kafka.service.j2
+    dest: /etc/systemd/system/kafka.service
+  notify:
+    - start kafka
+  become: true

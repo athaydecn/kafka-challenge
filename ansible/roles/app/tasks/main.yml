@@ -1,0 +1,41 @@
+---
+
+- name: install java
+  yum:
+    name: java-1.8.0-openjdk
+    state: latest
+  become: true
+
+- name: install docker dependencies
+  yum:
+    name: ['yum-utils', 'device-mapper-persistent-data', 'lvm2', 'gcc']
+    state: present
+  become: true
+
+- name: add docker repo
+  get_url:
+    url: "https://download.docker.com/linux/centos/docker-ce.repo"
+    dest: /etc/yum.repos.d/docker-ce.repo
+  become: true
+
+- name: install docker
+  yum:
+    name: ['docker-ce', 'docker-ce-cli', 'containerd.io']
+    state: present
+  become: true
+  notify:
+    - start docker
+
+- name: install docker-compose
+  get_url:
+    url: "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-Linux-x86_64"
+    dest: /usr/local/bin/docker-compose
+    mode: 0755
+  become: true
+
+- name: restart docker
+  service:
+    name: docker
+    state: started
+    enabled: true
+  become: true

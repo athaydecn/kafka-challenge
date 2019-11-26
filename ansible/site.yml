@@ -1,0 +1,13 @@
+---
+
+- hosts: zookeeper
+  roles:
+    - zookeeper
+
+- hosts: kafka
+  roles:
+    - kafka
+
+- hosts: app
+  roles:
+    - app

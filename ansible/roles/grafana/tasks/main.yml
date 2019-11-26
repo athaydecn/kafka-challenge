@@ -1,0 +1,33 @@
+---
+
+- name: install grafana package
+  yum:
+    name: "{{ grafana_release_url }}"
+    state: present
+  become: true
+
+- name: copy prometheus datasource file
+  template:
+    src: "datasource_prometheus.yaml.j2"
+    dest: "/etc/grafana/provisioning/datasources/datasource_prometheus.yaml"
+    owner: "{{ grafana_user }}"
+    group: "{{ grafana_group }}"
+  become: true
+
+- name: create grafana dashboard directory
+  file:
+    path: "/var/lib/grafana/dashboards"
+    state: directory
+    owner: "{{ grafana_user }}"
+    group: "{{ grafana_group }}"
+  become: true
+
+- name: copy kafka dashboard
+  copy:
+    src: "Kafka.json"
+    dest: "/var/lib/grafana/dashboards"
+    owner: "{{ grafana_user }}"
+    group: "{{ grafana_group }}"
+  become: true
+  notify:
+    - start grafana

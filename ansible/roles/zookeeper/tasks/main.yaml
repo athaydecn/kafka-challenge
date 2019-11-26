@@ -1,0 +1,61 @@
+---
+
+- name: install java
+  yum:
+    name: java-1.8.0-openjdk
+    state: latest
+  become: true
+
+- name: create zookeeper user
+  user:
+    name: "{{ user_zoo }}"
+    shell: /sbin/nologin
+    comment: "Zookeeper User"
+  become: true
+
+- name: create zookeeper directories
+  file:
+    path: "{{ item }}"
+    owner: "{{ user_zoo }}"
+    mode: 0755
+    state: directory
+  with_items:
+    - "{{ data_dir_zoo }}"
+    - "{{ log_dir_zoo }}"
+  become: true
+
+- name: download zookeper
+  unarchive:
+    src: "{{ zookeeper_link }}"
+    dest: "/opt/"
+    owner: "{{ user_zoo }}"
+    remote_src: true
+  become: true
+
+- name: create symbolic link
+  file:
+    src: "/opt/zookeeper-{{ version_zoo }}"
+    dest: "{{ path_zoo }}"
+    state: link
+  become: true
+
+- name: change config files
+  template:
+    src: "{{ item.orig }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ user_zoo }}"
+    backup: true
+  with_items:
+    - orig: zoo.cfg.j2
+      dest: "{{ path_zoo }}/conf/zoo.cfg"
+    - orig: jvm.properties.j2
+      dest: "{{ path_zoo }}/conf/jvm.properties"
+  become: true
+
+- name: config zookeeper service
+  template:
+    src: zookeeper.service.j2
+    dest: /etc/systemd/system/zookeeper.service
+  notify:
+    - start zookeeper
+  become: true
