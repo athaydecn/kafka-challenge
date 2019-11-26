@@ -29,13 +29,13 @@ Provisioning AWS Infrastructure
 ------------
 
 ```bash
-git clone https://github.com/athaydecn/kafka-challenge.git
-cd terraform/myvpc/
-terraform ini
-terraform apply
-cd terraform/myinstances/
-terraform ini
-terraform apply
+$ git clone https://github.com/athaydecn/kafka-challenge.git
+$ cd terraform/myvpc/
+$ terraform ini
+$ terraform apply
+$ cd terraform/myinstances/
+$ terraform ini
+$ terraform apply
 ``` 
 
 
@@ -49,10 +49,11 @@ Installing tools and configuring servers
 - Grafana
 
 ```bash
-cd ../ansible/
-vi hosts
-ansible-playbook site.yml -i hosts
-ansible-playbook monitor.yml -i hosts
+$ cd ../ansible/
+$ vi hosts
+
+$ ansible-playbook site.yml -i hosts
+$ ansible-playbook monitor.yml -i hosts
 ``` 
 
 
@@ -61,22 +62,22 @@ Testing Kafka
 
 Creating kafka topic:
 ```bash
-ssh centos@<kafka_instance>
-/etc/kafka/bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic test-topic
+$ ssh centos@<kafka_instance>
+$ /etc/kafka/bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic test-topic
 ``` 
 Starting Java Application Kafka Consumer:
 ```bash
-ssh centos@<app-1_instance>
-sudo docker run -d -e KAFKA_SERVER="<kafka_instance>:9092" -e KAFKA_TOPIC="test-topic" -e KAFKA_COUNT_MSG="10" athaydecn/app-kafka-consumer:latest
+$ ssh centos@<app-1_instance>
+$ sudo docker run -d -e KAFKA_SERVER="<kafka_instance>:9092" -e KAFKA_TOPIC="test-topic" -e KAFKA_COUNT_MSG="10" athaydecn/app-kafka-consumer:latest
 ``` 
 Starting Java Application Kafka Producer:
 ```bash
-ssh centos@<app-2_instance>
-sudo docker run -d -e KAFKA_SERVER="<kafka_instance>:9092" -e KAFKA_TOPIC="test-topic" -e KAFKA_COUNT_MSG="10" athaydecn/app-kafka-producer:latest
+$ ssh centos@<app-2_instance>
+$ sudo docker run -d -e KAFKA_SERVER="<kafka_instance>:9092" -e KAFKA_TOPIC="test-topic" -e KAFKA_COUNT_MSG="10" athaydecn/app-kafka-producer:latest
 ``` 
 
 Monitoring Kafka
 ------------
 
-Open Grafana dashboard on your browser
+Open Grafana dashboard on your browser:
 http://<grafana_instance>:3000/dashboards
